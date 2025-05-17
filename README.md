@@ -58,40 +58,31 @@ FastAPI-сервис для управления задачами с автор�
 #### 1. Создание задачи
 
 ```bash
-curl -X POST http://localhost:8000/tasks/ \
--H "Authorization: Bearer supersecrettoken123" \
--H "Content-Type: application/json" \
--d '{"title": "Сдать проект", "description": "До понедельника", "status": "new"}'
+curl -X POST http://localhost:8000/tasks/ -H "Authorization: Bearer 22222" -H "Content-Type: application/json" -d "{\"title\": \"Сдать проект\", \"description\": \"До понедельника\", \"status\": \"new\"}"
 ```
 
 #### 2. Получение списка задач с фильтрацией
 
 ```bash
-curl -X GET "http://localhost:8000/tasks/?status=done" \
--H "Authorization: Bearer supersecrettoken123"
+curl -X GET "http://localhost:8000/tasks/?status=done" -H "Authorization: Bearer supersecrettoken123"
 ```
 
 #### 3. Получение одной задачи
 
 ```bash
-curl -X GET http://localhost:8000/task/1 \
--H "Authorization: Bearer supersecrettoken123"
+curl -X GET http://localhost:8000/task/1 -H "Authorization: Bearer supersecrettoken123"
 ```
 
 #### 4. Обновление задачи
 
 ```bash
-curl -X PUT http://localhost:8000/task/1 \
--H "Authorization: Bearer supersecrettoken123" \
--H "Content-Type: application/json" \
--d '{"title": "Обновлённый заголовок", "status": "in_progress"}'
+curl -X PUT http://localhost:8000/task/1 -H "Authorization: Bearer supersecrettoken123" -H "Content-Type: application/json" -d "{\"title\": \"Обновлённый заголовок\", \"status\": \"in_progress\"}"
 ```
 
 #### 5. Удаление задачи
 
 ```bash
-curl -X DELETE http://localhost:8000/task/1 \
--H "Authorization: Bearer supersecrettoken123"
+curl -X DELETE http://localhost:8000/task/1 -H "Authorization: Bearer supersecrettoken123"
 ```
 
 ---
