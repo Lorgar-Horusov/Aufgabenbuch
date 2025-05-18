@@ -47,14 +47,22 @@ def get_tasks(
 
 def get_task(db: Session, task_id: int, user: str):
     try:
-        return db.query(models.Task).filter(models.Task.id == task_id, models.Task.user == user).first()
+        return (
+            db.query(models.Task)
+            .filter(models.Task.id == task_id, models.Task.user == user)
+            .first()
+        )
     except Exception:
         console.print_exception(show_locals=True)
 
 
 def update_task(db: Session, task_id: int, task: schemas.TaskUpdate, user: str):
     try:
-        db_task = db.query(models.Task).filter(models.Task.id == task_id, models.Task.user == user).first()
+        db_task = (
+            db.query(models.Task)
+            .filter(models.Task.id == task_id, models.Task.user == user)
+            .first()
+        )
         if db_task:
             for key, value in task.model_dump().items():
                 setattr(db_task, key, value)
@@ -64,9 +72,14 @@ def update_task(db: Session, task_id: int, task: schemas.TaskUpdate, user: str):
     except Exception:
         console.print_exception(show_locals=True)
 
+
 def delete_task(db: Session, task_id: int, user: str):
     try:
-        db_task = db.query(models.Task).filter(models.Task.id == task_id, models.Task.user == user).first()
+        db_task = (
+            db.query(models.Task)
+            .filter(models.Task.id == task_id, models.Task.user == user)
+            .first()
+        )
         if db_task:
             db.delete(db_task)
             db.commit()

@@ -1,10 +1,5 @@
-from fastapi import (
-    FastAPI,
-    Depends,
-    HTTPException,
-    status,
-    Query
-)
+from fastapi import FastAPI, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
 from fastapi.security import (
     HTTPBearer,
     HTTPAuthorizationCredentials,
@@ -14,7 +9,8 @@ from util import (
     schemas,
 )
 from util.database import (
-    Session, init_db, SessionLocal,
+    init_db,
+    SessionLocal,
 )
 from dotenv import load_dotenv
 import os
@@ -24,6 +20,7 @@ from rich.logging import RichHandler
 from rich.console import Console
 from typing import Optional
 from datetime import datetime
+
 console = Console()
 load_dotenv()
 FORMAT = "%(message)s"
@@ -32,7 +29,15 @@ logging.basicConfig(
 )
 
 security = HTTPBearer()
-app = FastAPI()
+app = FastAPI(
+    title="Task Management API",
+    description="API for managing tasks",
+    version="1.0.0",
+    contact={
+        "name": "Lorgar Horusov",
+        "url": "https://github.com/Lorgar-Horusov/",
+    }
+)
 
 
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
@@ -61,8 +66,14 @@ def get_db():
 init_db()
 
 
-@app.post('/tasks/', response_model=schemas.TaskOut, dependencies=[Depends(verify_token)])
-def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db), username: str = Depends(verify_token)):
+@app.post(
+    "/tasks/", response_model=schemas.TaskOut, dependencies=[Depends(verify_token)]
+)
+def create_task(
+    task: schemas.TaskCreate,
+    db: Session = Depends(get_db),
+    username: str = Depends(verify_token),
+):
     try:
         db_task = crud.create_task(db=db, task=task, username=username)
         if not db_task:
@@ -72,43 +83,67 @@ def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db), usernam
         console.print_exception(show_locals=True)
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@app.get('/task/{task_id}', response_model=schemas.TaskOut, dependencies=[Depends(verify_token)])
-def get_task(task_id: int, db: Session = Depends(get_db), username: str = Depends(verify_token)):
+
+@app.get(
+    "/task/{task_id}",
+    response_model=schemas.TaskOut,
+    dependencies=[Depends(verify_token)],
+)
+def get_task(
+    task_id: int, db: Session = Depends(get_db), username: str = Depends(verify_token)
+):
     task = crud.get_task(db=db, task_id=task_id, user=username)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return task
 
-@app.get('/tasks/', response_model=list[schemas.TaskOut], dependencies=[Depends(verify_token)])
+
+@app.get(
+    "/tasks/",
+    response_model=list[schemas.TaskOut],
+    dependencies=[Depends(verify_token)],
+)
 def get_tasks(
     db: Session = Depends(get_db),
     username: str = Depends(verify_token),
     status: Optional[str] = Query(None, description="Filter by task status"),
     date_from: Optional[datetime] = Query(None, description="Start date (ISO format)"),
-    date_to: Optional[datetime] = Query(None, description="End date (ISO format)")
+    date_to: Optional[datetime] = Query(None, description="End date (ISO format)"),
 ):
     try:
         return crud.get_tasks(
-            db=db,
-            user=username,
-            status=status,
-            date_from=date_from,
-            date_to=date_to
+            db=db, user=username, status=status, date_from=date_from, date_to=date_to
         )
     except Exception:
         console.print_exception(show_locals=True)
         raise HTTPException(status_code=500, detail="Failed to retrieve tasks")
 
-@app.put('/task/{task_id}', response_model=schemas.TaskOut, dependencies=[Depends(verify_token)])
-def update_task(task_id: int, task: schemas.TaskUpdate, db: Session = Depends(get_db), username: str = Depends(verify_token)):
+
+@app.put(
+    "/task/{task_id}",
+    response_model=schemas.TaskOut,
+    dependencies=[Depends(verify_token)],
+)
+def update_task(
+    task_id: int,
+    task: schemas.TaskUpdate,
+    db: Session = Depends(get_db),
+    username: str = Depends(verify_token),
+):
     try:
         return crud.update_task(db=db, task_id=task_id, task=task, user=username)
     except Exception:
         console.print_exception(show_locals=True)
 
 
-@app.delete('/task/{task_id}', response_model=schemas.TaskOut, dependencies=[Depends(verify_token)])
-def delete_task(task_id: int, db: Session = Depends(get_db), username: str = Depends(verify_token)):
+@app.delete(
+    "/task/{task_id}",
+    response_model=schemas.TaskOut,
+    dependencies=[Depends(verify_token)],
+)
+def delete_task(
+    task_id: int, db: Session = Depends(get_db), username: str = Depends(verify_token)
+):
     try:
         return crud.delete_task(db=db, task_id=task_id, user=username)
     except Exception:
